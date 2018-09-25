@@ -42,7 +42,7 @@ class IpSolidify(object):
         self._redis = StrictRedis(connection_pool=self._pool)
 
         self._header = "proxy_ip"
-        self._invalid_time = 5 * 60
+        self._invalid_time = 11 * 60
 
     @property
     def redis(self):

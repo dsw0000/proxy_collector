@@ -35,6 +35,8 @@ proxies = {
 
 PAGE = 5
 
+redis_url = "redis://:Dsw871127@shao5.net:30001/1"
+
 
 def get_proxies_xici():
     url_header = 'http://www.xicidaili.com/%s/%d'
@@ -257,6 +259,5 @@ def main():
 
 
 if __name__ == "__main__":
-    redis_url = "redis://:Dsw871127@shao5.net:30001/1"
 
     main()
