@@ -35,7 +35,7 @@ proxies = {
 
 PAGE = 5
 
-redis_url = "redis://:xxxxxx@shao5.net:30001/1"
+redis_url = "redis://:xxxxx@shao5.net:30001/1"
 
 
 def get_proxies_xici():
@@ -182,7 +182,7 @@ def get_proxies_66():
     for ip_type in type_list:
         for protocol in protocols:
             while True:
-                html = proxy_redis.request(url % (ip_type, protocols[protocol]), headers=headers)
+                html = proxy_redis.request(url=url % (ip_type, protocols[protocol]), headers=headers)
                 soup = BeautifulSoup(html, 'lxml')
                 if soup:
                     break
