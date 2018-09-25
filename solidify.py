@@ -14,7 +14,8 @@
 
 from redis import StrictRedis, ConnectionPool
 from json import dumps
-
+from random import randint
+import requests
 
 
 class Proxy(object):
@@ -44,9 +45,52 @@ class IpSolidify(object):
         self._header = "proxy_ip"
         self._invalid_time = 11 * 60
 
+        self._proxies_list = []
+
+        self._init_proxy_list()
+
     @property
     def redis(self):
         return self._redis
+
+    def _init_proxy_list(self):
+        """
+        get proxy from redis
+        :return:
+        """
+        key_words = "%s:anonymous:*:*" % (self._header,)
+
+        keys = self._redis.keys(key_words)
+
+        for key in keys:
+            param = key.decode("utf-8").split(":")
+            self._proxies_list.append("%s_%s" % (param[2], param[3].replace("_", ":"), ))
+
+    def get_proxy(self):
+        """
+
+        :return:
+        """
+        proxy = {}
+        if len(self._proxies_list) == 0:
+            return proxy
+        proxy_str = self._proxies_list[randint(0, len(self._proxies_list))].split("_")
+        proxy[proxy_str[0]] = proxy_str[1]
+        print(proxy)
+        return proxy
+
+    def request(self, **kwargs):
+        """
+
+        :return:
+        """
+        proxy = self.get_proxy()
+
+        if len(proxy) == 0:
+            html = requests.get(**kwargs).content
+        else:
+            html = requests.get(proxies=proxy, **kwargs).content
+        return html
 
     def update_ip(self, proxy):
         """
@@ -72,10 +116,9 @@ class IpSolidify(object):
         except KeyError:
             raise KeyError
 
-        key = "%s:%s:%s" % (self._header, ip_type, ip_key)
+        key = "%s:%s:%s:%s" % (self._header, ip_type, proxy.protocol, ip_key)
 
-        if self._redis.exists(key):
-            self._redis.expire(key, self._invalid_time)
-        else:
-            self._redis.set(name=key, value=ip_info, ex=self._invalid_time)
-
+        # if self._redis.exists(key):
+        #     self._redis.expire(key, self._invalid_time)
+        # else:
+        self._redis.set(name=key, value=ip_info, ex=self._invalid_time)

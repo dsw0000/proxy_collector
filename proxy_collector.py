@@ -19,7 +19,7 @@ from solidify import Proxy, IpSolidify
 from threading import Thread
 from queue import Queue
 from re import findall
-
+import sys
 
 headers = {
     'Accept': '*/*',
@@ -35,10 +35,11 @@ proxies = {
 
 PAGE = 5
 
-redis_url = "redis://:xxxxx@shao5.net:30001/1"
+redis_url = "redis://:xxxxxx@shao5.net:30001/1"
 
 
 def get_proxies_xici():
+    global proxy_redis
     url_header = 'http://www.xicidaili.com/%s/%d'
 
     ip_result = []
@@ -52,7 +53,7 @@ def get_proxies_xici():
     for item in type_list:
         for page in range(1, PAGE + 1):
             url = url_header % (item, page)
-            html = requests.get(url=url, headers=headers).content
+            html = proxy_redis.request(url=url, headers=headers)
             soup = BeautifulSoup(html, 'lxml')
             ip_list = soup.find_all('tr')
 
@@ -105,6 +106,7 @@ def get_proxies_kuai():
     https://www.kuaidaili.com/
     :return:
     """
+    global proxy_redis
     url_header = 'https://www.kuaidaili.com/free/'
     type_list = {
         "inha/": "anonymous",
@@ -121,7 +123,7 @@ def get_proxies_kuai():
             else:
                 url = url_header + item
 
-            html = requests.get(url=url, headers=headers).content
+            html = proxy_redis.request(url=url, headers=headers)
             soup = BeautifulSoup(html, 'lxml')
             ip_list = soup.find_all('tr')
             if not len(ip_list):
@@ -169,6 +171,7 @@ def get_proxies_66():
     http://www.66ip.cn/
     :return:
     """
+    global proxy_redis
     url = "http://www.66ip.cn/nmtq.php?getnum=300&isp=0&anonymoustype=%s&start=&ports=&export=&ipaddress=&area=0&\
     proxytype=%d&api=66ip"
     protocols = {"http": 0, "https": 1}
@@ -179,12 +182,14 @@ def get_proxies_66():
     for ip_type in type_list:
         for protocol in protocols:
             while True:
-                html = requests.get(url % (ip_type, protocols[protocol]), headers=headers).content
+                html = proxy_redis.request(url % (ip_type, protocols[protocol]), headers=headers)
                 soup = BeautifulSoup(html, 'lxml')
                 if soup:
                     break
                 time.sleep(1)
             ip_list = soup.find('p')
+            if not ip_list:
+                continue
             ip_list = findall(r'[1-9]\d*.[1-9]\d*.[1-9]\d*.[1-9]\d*\:[1-9]\d*', ip_list.text)
 
             for ip in ip_list:
@@ -219,6 +224,9 @@ def verify_one_proxy(old_queue, new_queue, num):
 
 
 def main():
+    global proxy_redis
+    proxy_redis = IpSolidify(redis_url)
+
     proxies_list = []
     proxies_list.extend(get_proxies_xici())
     proxies_list.extend(get_proxies_kuai())
@@ -251,13 +259,11 @@ def main():
     print('verify_proxies done!')
     print(len(proxies_list))
 
-    rs = IpSolidify(redis_url)
     for proxy in proxies_list:
-        rs.update_ip(proxy)
+        proxy_redis.update_ip(proxy)
 
     print("save success.")
 
 
 if __name__ == "__main__":
-
     main()
