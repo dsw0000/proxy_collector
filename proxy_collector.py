@@ -35,7 +35,7 @@ proxies = {
 
 PAGE = 5
 
-redis_url = "redis://:Dsw871127@shao5.net:30001/1"
+redis_url = "redis://:xxxxx@shao5.net:30001/1"
 
 
 def get_proxies_xici():
