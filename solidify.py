@@ -89,9 +89,9 @@ class IpSolidify(object):
 
             try:
                 if len(proxy) == 0:
-                    html = requests.get(**kwargs).content
+                    html = requests.get(timeout=3, **kwargs).content
                 else:
-                    html = requests.get(proxies=proxy, **kwargs).content
+                    html = requests.get(proxies=proxy, timeout=3, **kwargs).content
             except requests.exceptions.ConnectionError:
                 continue
 
