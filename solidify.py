@@ -84,12 +84,18 @@ class IpSolidify(object):
 
         :return:
         """
-        proxy = self.get_proxy()
+        while True:
+            proxy = self.get_proxy()
 
-        if len(proxy) == 0:
-            html = requests.get(**kwargs).content
-        else:
-            html = requests.get(proxies=proxy, **kwargs).content
+            try:
+                if len(proxy) == 0:
+                    html = requests.get(**kwargs).content
+                else:
+                    html = requests.get(proxies=proxy, **kwargs).content
+            except requests.exceptions.ConnectionError:
+                continue
+
+            break
         return html
 
     def update_ip(self, proxy):
