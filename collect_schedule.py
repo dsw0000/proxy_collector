@@ -21,7 +21,7 @@ from proxy_collector import main
 
 if __name__ == "__main__":
 
-    period = 1
+    period = 10
 
     schedule.every(period).minutes.do(main)
 
