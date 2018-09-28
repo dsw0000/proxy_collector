@@ -74,7 +74,7 @@ class IpSolidify(object):
         proxy = {}
         if len(self._proxies_list) == 0:
             return proxy
-        proxy_str = self._proxies_list[randint(0, len(self._proxies_list))].split("_")
+        proxy_str = self._proxies_list[randint(0, len(self._proxies_list)) - 1].split("_")
         proxy[proxy_str[0]] = proxy_str[1]
         print(proxy)
         return proxy
